@@ -1,33 +1,43 @@
 import { galleryItems } from './gallery-items.js';
-// import * as basicLightbox from 'basiclightbox';
 // Change code below this line
-
-const galleryEl = document.querySelector(".gallery");
-const createMarkUpEl = createMarkUp(galleryItems);
-galleryEl.insertAdjacentHTML("beforeend", createMarkUpEl)
-
-function createMarkUp(images){
-  return images.map((item)=>
-  `
-  <li class="gallery__item">
-  <a class="gallery__link" href="${item.original}" onclick="event.preventDefault()">
-    <img
-      class="gallery__image"
-      src="${item.preview}"
-      data-source="${item.original}"
-      alt="${item.description}"
-    />
-  </a>
-</li>
-  `
-  ).join("")
-}
-
-galleryEl.addEventListener("click", createBasicLB);
-
-function createBasicLB(event){
-  console.log(event.target.dataset.source)
-  const instance = basicLightbox.create(`
-  <img src="${event.target.dataset.source}" width="80" height ="600">`)
-instance.show()
-}
+const galleryList = document.querySelector('.gallery');
+const createGallery = element => {
+  return element
+    .map(({ preview, original, description }) => {
+      return `
+        <li class="gallery__item">
+            <a class="gallery__link" href="${original}">
+                <img
+                class="gallery__image"
+                src="${preview}"
+                data-source="${original}"
+                alt="${description}"
+                />
+            </a>
+        </li>`;
+    })
+    .join('');
+};
+const photosMarkup = createGallery(galleryItems);
+galleryList.insertAdjacentHTML('beforeend', photosMarkup);
+// --------------------------------------------------------------
+// handleGalleryClick
+const handleGalleryClick = event => {
+  event.preventDefault();
+  if (event.target.nodeName !== 'IMG') {
+    return;
+  }
+  const urlOriginal = event.target.dataset.source;
+  // create new basicLightbox instance
+  const instance = basicLightbox.create(`<img src="${urlOriginal}">`);
+  instance.show();
+  // handleOnEscKeyPress
+  const handleOnEscKeyPress = event => {
+    if (event.key === 'Escape') {
+      instance.close();
+      window.removeEventListener('keydown', handleOnEscKeyPress);
+    }
+  };
+  window.addEventListener('keydown', handleOnEscKeyPress);
+};
+galleryList.addEventListener('click', handleGalleryClick);
